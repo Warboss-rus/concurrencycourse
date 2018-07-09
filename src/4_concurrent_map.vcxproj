@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{4944ECE1-1B14-43DC-A17B-D914B7E29239}</ProjectGuid>
+    <ProjectGuid>{3A5533E5-1B1C-4EDC-97D4-16AFE16273DE}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>My3mutex</RootNamespace>
+    <RootNamespace>My4concurrentmap</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -151,10 +151,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="3_mutex.cpp" />
+    <ClCompile Include="4_concurrent_map.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="JoinableThread.h" />
+    <ClInclude Include="concurrent_map.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
