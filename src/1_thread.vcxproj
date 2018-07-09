@@ -154,6 +154,9 @@
   <ItemGroup>
     <ClCompile Include="1_thread.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="JoinableThread.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -3,4 +3,7 @@
   <ItemGroup>
     <ClCompile Include="1_thread.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="JoinableThread.h" />
+  </ItemGroup>
 </Project>
