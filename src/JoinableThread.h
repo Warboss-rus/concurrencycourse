@@ -9,22 +9,22 @@ public:
 	}
 
 	template <typename T>
-	JoinableThread(T && f)
-		:m_thread(std::forward<T>(f))
+	JoinableThread(T&& f)
+		: m_thread(std::forward<T>(f))
 	{
 	}
 
-	JoinableThread(JoinableThread && x)
-		:m_thread(std::move(x.m_thread))
+	JoinableThread(JoinableThread&& x)
+		: m_thread(std::move(x.m_thread))
 	{
 	}
 
-	JoinableThread & operator=(JoinableThread && x)
+	JoinableThread& operator=(JoinableThread&& x)
 	{
 		return *this = std::move(x.m_thread);
 	}
 
-	JoinableThread & operator=(Thread && thread)
+	JoinableThread& operator=(Thread&& thread)
 	{
 		if (&m_thread != &thread)
 		{
@@ -39,7 +39,7 @@ public:
 		JoinIfJoinable();
 	}
 
-	bool joinable()const
+	bool joinable() const
 	{
 		return m_thread.joinable();
 	}
@@ -49,7 +49,7 @@ public:
 		m_thread.join();
 	}
 
-	Thread & get()
+	Thread& get()
 	{
 		return m_thread;
 	}
@@ -62,6 +62,6 @@ private:
 			m_thread.join();
 		}
 	}
-		
+
 	Thread m_thread;
 };
