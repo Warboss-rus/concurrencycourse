@@ -2,7 +2,7 @@
 #include <deque>
 #include <mutex>
 
-template<class T>
+template <class T>
 class SimpleThreadSafeQueue
 {
 private:
