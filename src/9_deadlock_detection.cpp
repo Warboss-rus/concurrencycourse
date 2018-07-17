@@ -7,6 +7,7 @@
 #include <mutex>
 #include <random>
 #include <string>
+#include <string_view>
 #include <thread>
 #include <type_traits>
 #include <utility>
