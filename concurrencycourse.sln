@@ -19,7 +19,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "7_conditional_variable", "s
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "8_thread_safe_queue", "src\8_thread_safe_queue.vcxproj", "{1C73352F-3E28-49A5-9076-3E886D8E6583}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "9_deadlock_detection", "src\9_deadlock_detection.vcxproj", "{E9A3D272-CB33-465A-99C4-F8CA51873007}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "6_deadlock_detection", "src\6_deadlock_detection.vcxproj", "{E9A3D272-CB33-465A-99C4-F8CA51873007}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
