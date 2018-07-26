@@ -1,21 +1,27 @@
 #pragma once
-#include "SimpleThreadSafeQueue.h"
 #include "JoinableThread.h"
+#include "SimpleThreadSafeQueue.h"
 #include <atomic>
+#include <future>
 
 class thread_pool
 {
 	std::atomic_bool done = ATOMIC_VAR_INIT(false);
-	SimpleThreadSafeQueue<std::function<void()>> work_queue;
+	SimpleThreadSafeQueue<std::packaged_task<void()>> work_queue;
 	std::vector<JoinableThread<std::thread>> threads;
 
 	void worker_thread()
 	{
 		while (!done)
 		{
-			if (auto task = work_queue.wait_and_pop())
+			std::packaged_task<void()> task;
+			if (work_queue.try_pop(task))
 			{
 				task();
+			}
+			else
+			{
+				std::this_thread::yield();
 			}
 		}
 	}
@@ -44,8 +50,20 @@ public:
 	}
 
 	template <typename FunctionType>
-	void submit(FunctionType f)
+	std::future<void> submit(FunctionType f)
 	{
-		work_queue.push(std::function<void()>(f));
+		std::packaged_task<void()> task(f);
+		auto future = task.get_future();
+		work_queue.push(std::move(task));
+		return std::move(future);
+	}
+
+	void run_pending_task()
+	{
+		std::packaged_task<void()> task;
+		if (work_queue.try_pop(task))
+		{
+			task();
+		}
 	}
 };

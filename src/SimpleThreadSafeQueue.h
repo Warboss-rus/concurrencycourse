@@ -29,4 +29,16 @@ public:
 		m_queue.pop_front();
 		return std::move(value);
 	}
+
+	bool try_pop(T& val)
+	{
+		std::lock_guard lk(m_mutex);
+		if (!m_queue.empty())
+		{
+			val = std::move(m_queue.front());
+			m_queue.pop_front();
+			return true;
+		}
+		return false;
+	}
 };
