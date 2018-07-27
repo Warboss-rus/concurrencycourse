@@ -1,6 +1,7 @@
 #pragma once
 #include <mutex>
 #include <memory>
+#include <optional>
 
 template <typename T>
 class optimized_thread_safe_queue
@@ -8,7 +9,7 @@ class optimized_thread_safe_queue
 private:
 	struct node
 	{
-		std::shared_ptr<T> data;
+		std::optional<T> data;
 		std::unique_ptr<node> next;
 	};
 
@@ -79,10 +80,10 @@ public:
 	{
 	}
 
-	std::shared_ptr<T> try_pop()
+	std::optional<T> try_pop()
 	{
 		std::unique_ptr<node> old_head = try_pop_head();
-		return old_head ? old_head->data : std::shared_ptr<T>();
+		return old_head ? std::move(old_head->data) : std::optional<T>();
 	}
 
 	bool try_pop(T& value)
@@ -91,10 +92,10 @@ public:
 		return old_head;
 	}
 
-	std::shared_ptr<T> wait_and_pop()
+	std::optional<T> wait_and_pop()
 	{
 		std::unique_ptr<node> const old_head = wait_pop_head();
-		return old_head->data;
+		return std::move(old_head->data);
 	}
 
 	void wait_and_pop(T& value)
@@ -104,12 +105,10 @@ public:
 
 	void push(T new_value)
 	{
-		std::shared_ptr<T> new_data(
-			std::make_shared<T>(std::move(new_value)));
 		std::unique_ptr<node> p(new node);
 		{
 			std::lock_guard<std::mutex> tail_lock(tail_mutex);
-			tail->data = new_data;
+			tail->data = std::move(new_value);
 			node* const new_tail = p.get();
 			tail->next = std::move(p);
 			tail = new_tail;
