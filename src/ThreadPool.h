@@ -6,15 +6,17 @@
 
 class thread_pool
 {
+	using Task = std::function<void()>;
+
 	std::atomic_bool done = ATOMIC_VAR_INIT(false);
-	SimpleThreadSafeQueue<std::packaged_task<void()>> work_queue;
+	SimpleThreadSafeQueue<Task> work_queue;
 	std::vector<JoinableThread<std::thread>> threads;
 
 	void worker_thread()
 	{
 		while (!done)
 		{
-			std::packaged_task<void()> task;
+			Task task;
 			if (work_queue.try_pop(task))
 			{
 				task();
@@ -50,20 +52,8 @@ public:
 	}
 
 	template <typename FunctionType>
-	std::future<void> submit(FunctionType f)
+	void submit(FunctionType f)
 	{
-		std::packaged_task<void()> task(f);
-		auto future = task.get_future();
-		work_queue.push(std::move(task));
-		return std::move(future);
-	}
-
-	void run_pending_task()
-	{
-		std::packaged_task<void()> task;
-		if (work_queue.try_pop(task))
-		{
-			task();
-		}
+		work_queue.push(std::move(f));
 	}
 };

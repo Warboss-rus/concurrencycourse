@@ -7,5 +7,6 @@
   <ItemGroup>
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="SimpleThreadSafeQueue.h" />
+    <ClInclude Include="WaitGroup.h" />
   </ItemGroup>
 </Project>
