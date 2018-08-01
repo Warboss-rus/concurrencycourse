@@ -8,9 +8,9 @@ public:
 	{
 	}
 
-	template <typename T>
-	JoinableThread(T&& f)
-		: m_thread(std::forward<T>(f))
+	template <typename... Args>
+	JoinableThread(Args&&... args)
+		: m_thread(std::forward<Args>(args)...)
 	{
 	}
 
