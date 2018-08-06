@@ -80,6 +80,21 @@ public:
 	{
 	}
 
+	~optimized_thread_safe_queue()
+	{
+		std::vector<node*> nodes;
+		auto current_node = head.get();
+		while (current_node)
+		{
+			nodes.emplace_back(current_node);
+			current_node = current_node->next.get();
+		}
+		for (auto it = nodes.rbegin(); it != nodes.rend(); ++it)
+		{
+			(*it)->next.reset();
+		}
+	}
+
 	std::optional<T> try_pop()
 	{
 		std::unique_ptr<node> old_head = try_pop_head();
