@@ -169,7 +169,6 @@
   <ItemGroup>
     <ClInclude Include="SimpleThreadSafeQueue.h" />
     <ClInclude Include="ThreadPool.h" />
-    <ClInclude Include="WaitGroup.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\benchmark.vcxproj">

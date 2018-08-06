@@ -11,6 +11,9 @@ class thread_pool
 	std::atomic_bool done = ATOMIC_VAR_INIT(false);
 	SimpleThreadSafeQueue<Task> work_queue;
 	std::vector<JoinableThread<std::thread>> threads;
+	std::atomic<unsigned> m_taskCount{ 0 };
+	std::condition_variable m_tasksComplete;
+	std::mutex m_tasksCompleteMutex;
 
 	void worker_thread()
 	{
@@ -20,6 +23,11 @@ class thread_pool
 			if (work_queue.try_pop(task))
 			{
 				task();
+				if (1 == m_taskCount.fetch_sub(1, std::memory_order_relaxed))
+				{
+					std::unique_lock lk(m_tasksCompleteMutex);
+					m_tasksComplete.notify_all();
+				}
 			}
 			else
 			{
@@ -54,6 +62,15 @@ public:
 	template <typename FunctionType>
 	void submit(FunctionType f)
 	{
+		m_taskCount.fetch_add(1, std::memory_order_relaxed);
 		work_queue.push(std::move(f));
+	}
+
+	void wait_all()
+	{
+		std::unique_lock lk(m_tasksCompleteMutex);
+		m_tasksComplete.wait(lk, [this](){
+			return m_taskCount == 0;
+		});
 	}
 };
