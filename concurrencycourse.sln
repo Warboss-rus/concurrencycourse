@@ -15,7 +15,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "4_concurrent_map", "src\4_c
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "5_concurrent_map_2", "src\5_concurrent_map_2.vcxproj", "{D4AFD435-8060-4DCD-878C-C7408BDA9235}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "7_conditional_variable", "src\7_conditional_variable.vcxproj", "{FD485485-48DA-43A7-86E2-675CED7A22EF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "7_condition_variable", "src\7_condition_variable.vcxproj", "{FD485485-48DA-43A7-86E2-675CED7A22EF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "8_thread_safe_queue", "src\8_thread_safe_queue.vcxproj", "{1C73352F-3E28-49A5-9076-3E886D8E6583}"
 EndProject

@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{FD485485-48DA-43A7-86E2-675CED7A22EF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>My7conditionalvariable</RootNamespace>
+    <RootNamespace>My7conditionvariable</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -155,7 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="7_conditional_variable.cpp" />
+    <ClCompile Include="7_condition_variable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JoinableThread.h" />
