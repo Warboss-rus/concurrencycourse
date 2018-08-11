@@ -6,5 +6,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="hierarchical_mutex.h" />
+    <ClInclude Include="Logger.h" />
   </ItemGroup>
 </Project>

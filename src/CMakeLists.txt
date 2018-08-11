@@ -17,7 +17,7 @@ add_executable(5_concurrent_map_2 x_start.cpp 5_concurrent_map_2.cpp concurrent_
 custom_enable_cxx17(5_concurrent_map_2)
 target_link_libraries(5_concurrent_map_2 PRIVATE benchmark)
 
-add_executable(6_deadlock_detection 6_deadlock_detection.cpp hierarchical_mutex.h hierarchical_mutex.cpp)
+add_executable(6_deadlock_detection 6_deadlock_detection.cpp hierarchical_mutex.h hierarchical_mutex.cpp Logger.h)
 custom_enable_cxx17(6_deadlock_detection)
 
 add_executable(7_condition_variable 7_condition_variable.cpp JoinableThread.h)

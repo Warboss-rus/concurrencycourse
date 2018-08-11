@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Logger.h"
 #include <cstdlib>
 #include <mutex>
 #include <stdexcept>
@@ -59,6 +60,7 @@ private:
 		if (this_thread_hierarchy_value <= hierarchy_value)
 		{
 #if 1 // Текущая стратегия обработки deadlock: вызов abort
+			Logger::Get().Log("deadlock detected! aborting");
 			abort();
 #else
 			throw std::logic_error("mutex hierarchy violated");

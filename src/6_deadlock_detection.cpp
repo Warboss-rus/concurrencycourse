@@ -1,10 +1,13 @@
 #include "hierarchical_mutex.h"
+#include "Logger.h"
 #include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
+#include <limits>
+#include <list>
 #include <mutex>
 #include <random>
 #include <string>
@@ -12,8 +15,6 @@
 #include <thread>
 #include <type_traits>
 #include <utility>
-#include <vector>
-#include <limits>
 
 /**
  * TODO: выполните два задания
@@ -27,88 +28,31 @@ using namespace std::chrono;
 
 namespace
 {
-// Returns the quotient and remainder
-template <class T, class U>
-pair<int64_t, int64_t> Div2(T divident, U divisor)
-{
-	static_assert(is_integral_v<T>, "divident must be integral");
-	static_assert(is_integral_v<U>, "divisor must be integral");
-	using C = common_type_t<T, U>;
-	const C dividentC = static_cast<C>(divident);
-	const C divisorC = static_cast<C>(divisor);
-	return { dividentC / divisorC, dividentC % divisorC };
-}
 
 milliseconds RandomTime(milliseconds from, milliseconds to)
 {
-	thread_local std::mt19937 generator{ std::random_device()() };
+	thread_local mt19937 generator{ random_device()() };
 	uniform_int_distribution<milliseconds::rep> distribution(from.count(), to.count());
 
 	return milliseconds(distribution(generator));
-}
-
-class Logger
-{
-public:
-	static Logger& Get()
-	{
-		static Logger s_logger;
-		return s_logger;
-	}
-
-	static void Log(string_view message)
-	{
-		Logger& logger = Get();
-		logger.LogImpl(message);
-	}
-
-private:
-	Logger()
-		: m_startTime(steady_clock::now())
-	{
-	}
-
-	void LogImpl(string_view message) const
-	{
-		cout << FormatUptime() << " " << message << endl;
-	}
-
-	string FormatUptime() const
-	{
-		const milliseconds uptime = GetUptime();
-		auto [uptimeSec, uptimeMsec] = Div2(uptime.count(), 1000);
-		char buf[128] = { 0 };
-		snprintf(buf, std::size(buf), "[%d.%03ds]", static_cast<int>(uptimeSec), static_cast<int>(uptimeMsec));
-
-		return buf;
-	}
-
-	milliseconds GetUptime() const
-	{
-		return duration_cast<milliseconds>(steady_clock::now() - m_startTime);
-	}
-
-	steady_clock::time_point m_startTime;
-};
-
-void log(const string& message)
-{
-	cout << message << endl;
 }
 
 class Table
 {
 public:
 	explicit Table(size_t seatCount)
-		: m_forks(seatCount)
 	{
+		for (size_t i = 0; i < seatCount; ++i)
+		{
+			m_forks.emplace_back();
+		}
 	}
 
 	class Seat
 	{
 	public:
-		Seat(vector<mutex>& forks, size_t fork1, size_t fork2)
-			: m_forks(forks)
+		Seat(list<mutex>& forks, size_t fork1, size_t fork2)
+			: m_forks(&forks)
 			, m_fork1(fork1)
 			, m_fork2(fork2)
 		{
@@ -127,11 +71,13 @@ public:
 	private:
 		mutex& GetFork(size_t index)
 		{
-			Logger::Log("requested fork #" + std::to_string(index));
-			return m_forks.get().at(index);
+			Logger::Log("requested fork #" + to_string(index));
+			auto it = m_forks->begin();
+			std::advance(it, index);
+			return *it;
 		}
 
-		std::reference_wrapper<vector<mutex>> m_forks;
+		list<mutex>* m_forks = nullptr;
 		size_t m_fork1;
 		size_t m_fork2;
 	};
@@ -142,7 +88,7 @@ public:
 	}
 
 private:
-	vector<mutex> m_forks;
+	list<mutex> m_forks;
 };
 
 class Philosopher
@@ -176,10 +122,10 @@ public:
 				this_thread::sleep_for(RandomTime(50ms, 500ms));
 				Logger::Log(m_name + " going to eat");
 				{
-					std::unique_lock lock1(seat.GetFork1());
+					unique_lock lock1(seat.GetFork1());
 					this_thread::sleep_for(RandomTime(50ms, 100ms));
 
-					std::unique_lock lock2(seat.GetFork2());
+					unique_lock lock2(seat.GetFork2());
 					Logger::Log(m_name + " eats..");
 					this_thread::sleep_for(RandomTime(50ms, 125ms));
 				}
@@ -218,5 +164,5 @@ int main()
     hegel.Start(table.GetSeat(4));
 #endif
 
-	std::this_thread::sleep_for(600s);
+	this_thread::sleep_for(60s);
 }
