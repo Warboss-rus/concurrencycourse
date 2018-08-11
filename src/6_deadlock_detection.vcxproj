@@ -71,23 +71,27 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>tmp\$(ProjectName)\$(Platform)-$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)~output\tmp\$(ProjectName)\$(Configuration)-$(Platform)\</IntDir>
     <IncludePath>..\benchmark\include;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)~output\bin\$(ProjectName)\$(Configuration)-$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IntDir>tmp\$(ProjectName)\$(Platform)-$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)~output\tmp\$(ProjectName)\$(Configuration)-$(Platform)\</IntDir>
     <IncludePath>..\benchmark\include;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)~output\bin\$(ProjectName)\$(Configuration)-$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IntDir>tmp\$(ProjectName)\$(Platform)-$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)~output\tmp\$(ProjectName)\$(Configuration)-$(Platform)\</IntDir>
     <IncludePath>..\benchmark\include;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)~output\bin\$(ProjectName)\$(Configuration)-$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>tmp\$(ProjectName)\$(Platform)-$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)~output\tmp\$(ProjectName)\$(Configuration)-$(Platform)\</IntDir>
     <IncludePath>..\benchmark\include;$(IncludePath)</IncludePath>
+    <OutDir>$(SolutionDir)~output\bin\$(ProjectName)\$(Configuration)-$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -159,6 +163,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="6_deadlock_detection.cpp" />
+    <ClCompile Include="hierarchical_mutex.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="hierarchical_mutex.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
