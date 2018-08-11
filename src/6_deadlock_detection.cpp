@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <functional>
 #include <iostream>
+#include <limits>
+#include <list>
 #include <mutex>
 #include <random>
 #include <string>
@@ -11,8 +13,6 @@
 #include <thread>
 #include <type_traits>
 #include <utility>
-#include <vector>
-#include <limits>
 
 /**
  * TODO: выполните два задания
@@ -40,11 +40,56 @@ pair<int64_t, int64_t> Div2(T divident, U divisor)
 
 milliseconds RandomTime(milliseconds from, milliseconds to)
 {
-	thread_local std::mt19937 generator{ std::random_device()() };
+	thread_local mt19937 generator{ random_device()() };
 	uniform_int_distribution<milliseconds::rep> distribution(from.count(), to.count());
 
 	return milliseconds(distribution(generator));
 }
+
+// Класс Logger - это Singleton, к которому перенаправляются все записи в стандартный поток вывода (stdout).
+class Logger
+{
+public:
+	static Logger& Get()
+	{
+		static Logger s_logger;
+		return s_logger;
+	}
+
+	static void Log(string_view message)
+	{
+		Logger& logger = Get();
+		logger.LogImpl(message);
+	}
+
+private:
+	Logger()
+		: m_startTime(steady_clock::now())
+	{
+	}
+
+	void LogImpl(string_view message)
+	{
+		cout << FormatUptime() << " " << message << endl;
+	}
+
+	string FormatUptime() const
+	{
+		const milliseconds uptime = GetUptime();
+		auto [uptimeSec, uptimeMsec] = Div2(uptime.count(), 1000);
+		char buf[128] = { 0 };
+		snprintf(buf, size(buf), "[%d.%03ds]", static_cast<int>(uptimeSec), static_cast<int>(uptimeMsec));
+
+		return buf;
+	}
+
+	milliseconds GetUptime() const
+	{
+		return duration_cast<milliseconds>(steady_clock::now() - m_startTime);
+	}
+
+	steady_clock::time_point m_startTime;
+};
 
 // Класс hierarchical_mutex представляет mutex с обнаружением deadlock.
 // Объекты типа hierarchical_mutex совместно выстраивают иерархию использующих их потоков.
@@ -58,7 +103,7 @@ milliseconds RandomTime(milliseconds from, milliseconds to)
 class hierarchical_mutex
 {
 public:
-	explicit hierarchical_mutex(unsigned long value)
+	explicit hierarchical_mutex(unsigned value)
 		: hierarchy_value(value)
 		, previous_hierarchy_value(0)
 	{
@@ -90,20 +135,21 @@ public:
 	}
 
 private:
-	std::mutex internal_mutex;
-	unsigned long const hierarchy_value;
+	mutex internal_mutex;
+	unsigned hierarchy_value;
 	unsigned previous_hierarchy_value;
 
-	static thread_local unsigned long this_thread_hierarchy_value;
+	static thread_local unsigned this_thread_hierarchy_value;
 
 	void check_for_hierarchy_violation()
 	{
 		if (this_thread_hierarchy_value <= hierarchy_value)
 		{
 #if 1 // Текущая стратегия обработки deadlock: вызов abort
+			Logger::Get().Log("deadlock detected! aborting");
 			abort();
 #else
-			throw std::logic_error("mutex hierarchy violated");
+			throw logic_error("mutex hierarchy violated");
 #endif
 		}
 	}
@@ -115,70 +161,24 @@ private:
 	}
 };
 
-thread_local unsigned long hierarchical_mutex::this_thread_hierarchy_value{ (std::numeric_limits<unsigned long>::max)() };
-
-class Logger
-{
-public:
-	static Logger& Get()
-	{
-		static Logger s_logger;
-		return s_logger;
-	}
-
-	static void Log(string_view message)
-	{
-		Logger& logger = Get();
-		logger.LogImpl(message);
-	}
-
-private:
-	Logger()
-		: m_startTime(steady_clock::now())
-	{
-	}
-
-	void LogImpl(string_view message) const
-	{
-		cout << FormatUptime() << " " << message << endl;
-	}
-
-	string FormatUptime() const
-	{
-		const milliseconds uptime = GetUptime();
-		auto [uptimeSec, uptimeMsec] = Div2(uptime.count(), 1000);
-		char buf[128] = { 0 };
-		snprintf(buf, std::size(buf), "[%d.%03ds]", static_cast<int>(uptimeSec), static_cast<int>(uptimeMsec));
-
-		return buf;
-	}
-
-	milliseconds GetUptime() const
-	{
-		return duration_cast<milliseconds>(steady_clock::now() - m_startTime);
-	}
-
-	steady_clock::time_point m_startTime;
-};
-
-void log(const string& message)
-{
-	cout << message << endl;
-}
+thread_local unsigned hierarchical_mutex::this_thread_hierarchy_value{ (numeric_limits<unsigned>::max)() };
 
 class Table
 {
 public:
 	explicit Table(size_t seatCount)
-		: m_forks(seatCount)
 	{
+		for (size_t i = 0; i < seatCount; ++i)
+		{
+			m_forks.emplace_back();
+		}
 	}
 
 	class Seat
 	{
 	public:
-		Seat(vector<mutex>& forks, size_t fork1, size_t fork2)
-			: m_forks(forks)
+		Seat(list<mutex>& forks, size_t fork1, size_t fork2)
+			: m_forks(&forks)
 			, m_fork1(fork1)
 			, m_fork2(fork2)
 		{
@@ -197,11 +197,13 @@ public:
 	private:
 		mutex& GetFork(size_t index)
 		{
-			Logger::Log("requested fork #" + std::to_string(index));
-			return m_forks.get().at(index);
+			Logger::Log("requested fork #" + to_string(index));
+			auto it = m_forks->begin();
+			std::advance(it, index);
+			return *it;
 		}
 
-		std::reference_wrapper<vector<mutex>> m_forks;
+		list<mutex>* m_forks = nullptr;
 		size_t m_fork1;
 		size_t m_fork2;
 	};
@@ -212,7 +214,7 @@ public:
 	}
 
 private:
-	vector<mutex> m_forks;
+	list<mutex> m_forks;
 };
 
 class Philosopher
@@ -246,10 +248,10 @@ public:
 				this_thread::sleep_for(RandomTime(50ms, 500ms));
 				Logger::Log(m_name + " going to eat");
 				{
-					std::unique_lock lock1(seat.GetFork1());
+					unique_lock lock1(seat.GetFork1());
 					this_thread::sleep_for(RandomTime(50ms, 100ms));
 
-					std::unique_lock lock2(seat.GetFork2());
+					unique_lock lock2(seat.GetFork2());
 					Logger::Log(m_name + " eats..");
 					this_thread::sleep_for(RandomTime(50ms, 125ms));
 				}
@@ -288,5 +290,5 @@ int main()
     hegel.Start(table.GetSeat(4));
 #endif
 
-	std::this_thread::sleep_for(600s);
+	this_thread::sleep_for(60s);
 }
