@@ -12,7 +12,8 @@ foreach(p
   endif()
 endforeach()
 
-option(BENCHMARK_ENABLE_TESTING "Enable testing of the benchmark library." ON)
+# HACK: disabled for concurrency course
+# option(BENCHMARK_ENABLE_TESTING "Enable testing of the benchmark library." ON)
 option(BENCHMARK_ENABLE_EXCEPTIONS "Enable the use of exceptions in the benchmark library." ON)
 option(BENCHMARK_ENABLE_LTO "Enable link time optimisation of the benchmark library." OFF)
 option(BENCHMARK_USE_LIBCXX "Build and test using libc++ as the standard library." OFF)
@@ -25,7 +26,8 @@ option(BENCHMARK_DOWNLOAD_DEPENDENCIES "Allow the downloading and in-tree buildi
 
 # This option can be used to disable building and running unit tests which depend on gtest
 # in cases where it is not possible to build or find a valid version of gtest.
-option(BENCHMARK_ENABLE_GTEST_TESTS "Enable building the unit tests which depend on gtest" ON)
+# HACK: disabled for concurrency course
+# option(BENCHMARK_ENABLE_GTEST_TESTS "Enable building the unit tests which depend on gtest" ON)
 
 # Make sure we can import out CMake functions
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules")

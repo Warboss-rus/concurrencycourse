@@ -3,6 +3,7 @@
 #include "SimpleThreadSafeQueue.h"
 #include <atomic>
 #include <future>
+#include <vector>
 
 class thread_pool
 {

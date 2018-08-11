@@ -1,3 +1,5 @@
+#include "hierarchical_mutex.h"
+#include "Logger.h"
 #include <atomic>
 #include <chrono>
 #include <cstdint>
@@ -26,17 +28,6 @@ using namespace std::chrono;
 
 namespace
 {
-// Returns the quotient and remainder
-template <class T, class U>
-pair<int64_t, int64_t> Div2(T divident, U divisor)
-{
-	static_assert(is_integral_v<T>, "divident must be integral");
-	static_assert(is_integral_v<U>, "divisor must be integral");
-	using C = common_type_t<T, U>;
-	const C dividentC = static_cast<C>(divident);
-	const C divisorC = static_cast<C>(divisor);
-	return { dividentC / divisorC, dividentC % divisorC };
-}
 
 milliseconds RandomTime(milliseconds from, milliseconds to)
 {
@@ -45,123 +36,6 @@ milliseconds RandomTime(milliseconds from, milliseconds to)
 
 	return milliseconds(distribution(generator));
 }
-
-// Класс Logger - это Singleton, к которому перенаправляются все записи в стандартный поток вывода (stdout).
-class Logger
-{
-public:
-	static Logger& Get()
-	{
-		static Logger s_logger;
-		return s_logger;
-	}
-
-	static void Log(string_view message)
-	{
-		Logger& logger = Get();
-		logger.LogImpl(message);
-	}
-
-private:
-	Logger()
-		: m_startTime(steady_clock::now())
-	{
-	}
-
-	void LogImpl(string_view message)
-	{
-		cout << FormatUptime() << " " << message << endl;
-	}
-
-	string FormatUptime() const
-	{
-		const milliseconds uptime = GetUptime();
-		auto [uptimeSec, uptimeMsec] = Div2(uptime.count(), 1000);
-		char buf[128] = { 0 };
-		snprintf(buf, size(buf), "[%d.%03ds]", static_cast<int>(uptimeSec), static_cast<int>(uptimeMsec));
-
-		return buf;
-	}
-
-	milliseconds GetUptime() const
-	{
-		return duration_cast<milliseconds>(steady_clock::now() - m_startTime);
-	}
-
-	steady_clock::time_point m_startTime;
-};
-
-// Класс hierarchical_mutex представляет mutex с обнаружением deadlock.
-// Объекты типа hierarchical_mutex совместно выстраивают иерархию использующих их потоков.
-// Для хранения индекса потока в иерархии используется thread_local переменная.
-// Начальный индекс потока в иерархии - максимальное число unsigned.
-// Затем, при захвате mutex индекс потока становится равным константному индексу mutex,
-//  а mutex запоминает предыдущее значение индекса иерархии потока.
-// Затем, при освобождении mutex индекс потока становится прежним.
-// Если при захвате мьютекса индекс потока (т.е. индекс ранее захватенного mutex)
-//  меньше индекса захватываемого mutex, то произошёл deadlock.
-class hierarchical_mutex
-{
-public:
-	explicit hierarchical_mutex(unsigned value)
-		: hierarchy_value(value)
-		, previous_hierarchy_value(0)
-	{
-	}
-
-	void lock()
-	{
-		check_for_hierarchy_violation();
-		internal_mutex.lock();
-		update_hierarchy_value();
-	}
-
-	void unlock()
-	{
-		this_thread_hierarchy_value = previous_hierarchy_value;
-		internal_mutex.unlock();
-	}
-
-	bool try_lock()
-	{
-		check_for_hierarchy_violation();
-		if (!internal_mutex.try_lock())
-		{
-			return false;
-		}
-
-		update_hierarchy_value();
-		return true;
-	}
-
-private:
-	mutex internal_mutex;
-	unsigned hierarchy_value;
-	unsigned previous_hierarchy_value;
-
-	static thread_local unsigned this_thread_hierarchy_value;
-
-	void check_for_hierarchy_violation()
-	{
-		if (this_thread_hierarchy_value <= hierarchy_value)
-		{
-#if 1 // Текущая стратегия обработки deadlock: вызов abort
-			Logger::Get().Log("deadlock detected! aborting");
-			abort();
-#else
-			throw logic_error("mutex hierarchy violated");
-#endif
-		}
-	}
-
-	void update_hierarchy_value()
-	{
-		previous_hierarchy_value = this_thread_hierarchy_value;
-		this_thread_hierarchy_value = hierarchy_value;
-	}
-};
-
-thread_local unsigned hierarchical_mutex::this_thread_hierarchy_value{ (numeric_limits<unsigned>::max)() };
 
 class Table
 {

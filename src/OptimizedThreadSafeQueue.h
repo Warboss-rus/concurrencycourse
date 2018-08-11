@@ -2,6 +2,7 @@
 #include <mutex>
 #include <memory>
 #include <optional>
+#include <condition_variable>
 
 template <typename T>
 class optimized_thread_safe_queue

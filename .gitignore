@@ -1,5 +1,6 @@
 .vs
 *.user
+~output
 /src/tmp
 
 ## Ignore Visual Studio temporary files, build results, and

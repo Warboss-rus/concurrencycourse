@@ -2,6 +2,7 @@
 #include <map>
 #include <mutex>
 #include <optional>
+#include <functional>
 
 template<class Key, class Value>
 class concurrent_map

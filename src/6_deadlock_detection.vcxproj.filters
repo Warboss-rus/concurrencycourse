@@ -2,5 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="6_deadlock_detection.cpp" />
+    <ClCompile Include="hierarchical_mutex.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="hierarchical_mutex.h" />
+    <ClInclude Include="Logger.h" />
   </ItemGroup>
 </Project>

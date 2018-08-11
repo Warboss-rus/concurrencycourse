@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 template <typename Thread>
 class JoinableThread
 {
